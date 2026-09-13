@@ -24,6 +24,15 @@ Dashboard → Pup Store → Manage Sources → add this repo's URL (or a local p
 
 If you already run the stock core pup with an indexed datadir, you can seed this pup's storage with it: stop both pups, copy `/opt/dogebox/pups/storage/<old-hash>/` into the new pup's storage dir, start. Same chain → no reindex, no resync.
 
+## Maintenance — automated
+
+This fork tracks upstream automatically:
+
+- `scripts/sync-upstream.sh` — clones `Dogebox-WG/pups`, re-applies the one-line txindex patch to upstream's `pup.nix`, refreshes monitor/logger/logo assets, recomputes the manifest hash, and bumps the patch version. Bails loudly (instead of guessing) if upstream's flags change shape or ship txindex natively.
+- `.github/workflows/sync-upstream.yml` — runs the script weekly (Mon 04:23 UTC); commits + tags + pushes when upstream moves.
+
+So when Dogecoin Core (or the pup format) updates upstream, this repo follows within a week with zero human steps. The Dogebox Pup Store then offers the update on your box like any other pup.
+
 ## Status
 
-Dev-tier, tested on Dogebox OS beta (NanoPC-T6). Watch upstream `Dogebox-WG/pups` for Core version bumps and re-fork.
+Dev-tier, tested on Dogebox OS beta (NanoPC-T6).
