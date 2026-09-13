@@ -27,7 +27,10 @@ let
         RPCPASS=$(cat /storage/rpcpassword.txt)
     fi
 
+    # NOTE: -txindex=1 is the entire point of this fork. Verified present in
+    # the running process cmdline: `tr '\0' ' ' < /proc/$(pgrep dogecoind)/cmdline`
     ${dogecoind_bin}/bin/dogecoind \
+      -txindex=1 \
       -port=22556 \
       -datadir=${storageDirectory} \
       -rpc=1 \
@@ -36,7 +39,6 @@ let
       -rpcbind=$DBX_PUP_IP \
       -rpcport=22555 \
       -rpcallowip=0.0.0.0/0 \
-      -txindex=1 \
       -zmqpubhashblock=tcp://0.0.0.0:28332
   '';
 

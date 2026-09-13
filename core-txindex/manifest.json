@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "meta": {
     "name": "Dogecoin Core (txindex)",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "logoPath": "logo.png",
     "shortDescription": "Full core node with a complete transaction index",
     "longDescription": "Fork of the Dogecoin Foundation Core pup that runs Dogecoin Core with txindex=1, enabling every-transaction lookups via getrawtransaction for indexers, explorers and analytics tools. Disk usage is roughly 2x the standard node.",
@@ -16,7 +16,7 @@
   "container": {
     "build": {
       "nixFile": "pup.nix",
-      "nixFileSha256": "aa33a3f6a03ccc52b8b82b67338babf94bbf672285e25fa3a87bb4dbb488f444"
+      "nixFileSha256": "fbe6b76251cc664f868abf13ef3b4aa9155b4975271e4fc643d78f7e31e4b495"
     },
     "services": [
       {
