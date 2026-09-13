@@ -1,5 +1,8 @@
 # Dogecoin Core (txindex) — Dogebox pup
 
+<p align="center"><img src="docs/banner.jpg" width="100%" alt="Dogecoin Core (txindex) banner"></p>
+<p align="center"><img src="docs/logo.png" width="96" alt="Dogecoin Core (txindex) logo"></p>
+
 Fork of the [Dogebox-WG `core` pup](https://github.com/Dogebox-WG/pups/tree/main/core) that runs Dogecoin Core v1.14.9 with **`txindex=1`**, enabling by-transaction lookups (`getrawtransaction` for any txid) for indexers, explorers and analytics.
 
 ## Differences from upstream core pup
