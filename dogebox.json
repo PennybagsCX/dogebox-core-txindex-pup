@@ -1,0 +1,10 @@
+{
+  "id": "dts.pups.core-txindex",
+  "name": "dts — core-txindex",
+  "description": "Dogecoin Core with txindex=1 (fork of the Foundation core pup)",
+  "pups": [
+    {
+      "location": "core-txindex"
+    }
+  ]
+}

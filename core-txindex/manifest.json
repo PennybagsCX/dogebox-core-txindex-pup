@@ -1,0 +1,175 @@
+{
+  "manifestVersion": 1,
+  "meta": {
+    "name": "Dogecoin Core (txindex)",
+    "version": "0.0.1",
+    "logoPath": "logo.png",
+    "shortDescription": "Full core node with a complete transaction index",
+    "longDescription": "Fork of the Dogecoin Foundation Core pup that runs Dogecoin Core with txindex=1, enabling every-transaction lookups via getrawtransaction for indexers, explorers and analytics tools. Disk usage is roughly 2x the standard node.",
+    "upstreamVersions": {
+      "Core": "v1.14.9"
+    }
+  },
+  "config": {
+    "sections": null
+  },
+  "container": {
+    "build": {
+      "nixFile": "pup.nix",
+      "nixFileSha256": "aa33a3f6a03ccc52b8b82b67338babf94bbf672285e25fa3a87bb4dbb488f444"
+    },
+    "services": [
+      {
+        "name": "dogecoind",
+        "command": {
+          "exec": "/bin/run.sh",
+          "cwd": "",
+          "env": null
+        }
+      },
+      {
+        "name": "monitor",
+        "command": {
+          "exec": "/bin/monitor",
+          "cwd": "",
+          "env": null
+        }
+      },
+      {
+        "name": "logger",
+        "command": {
+          "exec": "/bin/logger",
+          "cwd": "",
+          "env": null
+        }
+      }
+    ],
+    "exposes": [
+      {
+        "name": "public-port",
+        "type": "tcp",
+        "port": 22556,
+        "interfaces": [
+          "core-network"
+        ],
+        "listenOnHost": true
+      },
+      {
+        "name": "rpc",
+        "type": "http",
+        "port": 22555,
+        "interfaces": [
+          "core-rpc"
+        ],
+        "listenOnHost": false
+      },
+      {
+        "name": "rpc-tcp",
+        "type": "tcp",
+        "port": 22555,
+        "interfaces": [
+          "core-rpc"
+        ],
+        "listenOnHost": false
+      },
+      {
+        "name": "zmq",
+        "type": "tcp",
+        "port": 28332,
+        "interfaces": [
+          "core-zmq"
+        ],
+        "listenOnHost": false
+      }
+    ],
+    "requiresInternet": true
+  },
+  "interfaces": [
+    {
+      "name": "core-rpc",
+      "version": "0.0.1",
+      "permissionGroups": [
+        {
+          "name": "RPC",
+          "description": "Allows RPC access to the Dogecoin Core node",
+          "severity": 2,
+          "routes": [
+            "/*"
+          ],
+          "port": 0
+        }
+      ]
+    },
+    {
+      "name": "core-zmq",
+      "version": "0.0.1",
+      "permissionGroups": [
+        {
+          "name": "ZMQ",
+          "description": "Allows ZMQ access to the Dogecoin Core node",
+          "severity": 1,
+          "routes": null,
+          "port": 28332
+        }
+      ]
+    },
+    {
+      "name": "core-network",
+      "version": "0.0.1",
+      "permissionGroups": [
+        {
+          "name": "Network",
+          "description": "Allows access to the Dogecoin Core node's network port",
+          "severity": 2,
+          "routes": null,
+          "port": 22556
+        }
+      ]
+    }
+  ],
+  "dependencies": null,
+  "metrics": [
+    {
+      "name": "chain",
+      "label": "Chain",
+      "type": "string",
+      "history": 1
+    },
+    {
+      "name": "blocks",
+      "label": "Block Height",
+      "type": "int",
+      "history": 30
+    },
+    {
+      "name": "headers",
+      "label": "Headers",
+      "type": "int",
+      "history": 30
+    },
+    {
+      "name": "difficulty",
+      "label": "Difficulty",
+      "type": "float",
+      "history": 30
+    },
+    {
+      "name": "verification_progress",
+      "label": "Verification progress",
+      "type": "string",
+      "history": 1
+    },
+    {
+      "name": "initial_block_download",
+      "label": "Initial Download",
+      "type": "string",
+      "history": 1
+    },
+    {
+      "name": "chain_size_human",
+      "label": "Blockchain Size",
+      "type": "string",
+      "history": 1
+    }
+  ]
+}
