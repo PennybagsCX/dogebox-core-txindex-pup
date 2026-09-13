@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "meta": {
     "name": "Dogecoin Core (txindex)",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "logoPath": "logo.png",
     "shortDescription": "Full core node with a complete transaction index",
     "longDescription": "Fork of the Dogecoin Foundation Core pup that runs Dogecoin Core with txindex=1, enabling every-transaction lookups via getrawtransaction for indexers, explorers and analytics tools. Disk usage is roughly 2x the standard node.",
