@@ -25,6 +25,16 @@ Learned 2026-09-13 while publishing and running the first third-party pups (Nano
 
 - `PUT /system/custom-nix` (dashboard-bearer-token auth, port 3000) accepts a NixOS module; it's validated (`nix-instantiate --parse`), imported into the system config, and triggers a rebuild. This is the supported way to add e.g. Samba or Tailscale, and it survives OS updates. Gotcha: each attribute (`networking.firewall.allowedUDPPorts` etc.) may only be declared once per module body.
 
+## DLNA / SSDP — container multicast does NOT reach the LAN
+
+Pups live on an internal routed bridge (10.69.0.x). **UPnP/DLNA discovery (SSDP multicast, UDP 1900, 239.255.255.250) does not traverse it** — a DLNA server inside a pup (e.g. Jellyfin's DLNA plugin) will never appear in a smart TV's source list, no matter how it's configured.
+
+**Pattern that works:** run the DLNA server on the HOST via custom-nix. `services.minidlna` (nixpkgs) with `settings.media_dir` pointing at the pup's storage path works immediately — verified with a 2016 Samsung Tizen TV discovering and connecting within a minute. Two gotchas:
+1. minidlna runs as its own user — `/opt/dogebox` is `drwx------ dogeboxd`, so the whole path needs `chmod o+x` for the scanner to read the media dirs (0 files indexed until then).
+2. Option shape (nixpkgs 25.11): `services.minidlna.settings = { friendly_name = "..."; media_dir = [ "V,/path" ]; };` — not `friendlyName`/`mediaDirectories`/`config.*`.
+
+Bonus: MiniDLNA's status page (`http://<box>:8200`) lists connecting clients — handy for verifying which TVs see the server.
+
 ## Nix packaging gotchas
 
 - The nixpkgs `jellyfin` wrapper already injects `--ffmpeg` — passing it yourself crashes Jellyfin with `Option 'ffmpeg' is defined multiple times`.
