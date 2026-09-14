@@ -39,8 +39,9 @@ fi
 sed 's|\(-zmqpubhashblock=tcp://0.0.0.0:28332\)|-txindex=1 \\\n      \1|' \
   "$UP_CORE/pup.nix" > "$OUR_PUP_NIX"
 
-# 2. Refresh ancillary assets wholesale (monitor/logger/logo may change upstream)
-for asset in monitor logger logo.png; do
+# 2. Refresh ancillary assets wholesale (monitor/logger may change upstream).
+#    NOTE: logo.png is intentionally NOT synced — this repo carries a custom logo.
+for asset in monitor logger; do
   rm -rf "$PUP_DIR/$asset"
   cp -R "$UP_CORE/$asset" "$PUP_DIR/$asset"
 done
