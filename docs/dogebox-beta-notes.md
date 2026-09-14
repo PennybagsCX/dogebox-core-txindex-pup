@@ -25,6 +25,36 @@ Learned 2026-09-13 while publishing and running the first third-party pups (Nano
 
 - `PUT /system/custom-nix` (dashboard-bearer-token auth, port 3000) accepts a NixOS module; it's validated (`nix-instantiate --parse`), imported into the system config, and triggers a rebuild. This is the supported way to add e.g. Samba or Tailscale, and it survives OS updates. Gotcha: each attribute (`networking.firewall.allowedUDPPorts` etc.) may only be declared once per module body.
 
+## The dogebox proxy breaks non-browser HTTP clients (502) — affects ALL webUI pups
+
+The 1000x mapped ports serve browsers fine but return **502 Bad Gateway for native app clients** (Jellyfin phone/TV apps, curl, raw HTTP). Anyone pointing a mobile app at a pup's mapped port will see "connection timed out" no matter what they try client-side.
+
+**Pattern that works:** an nginx vhost on the HOST (custom.nix) proxying straight to the pup's container IP with an explicit Host header:
+
+```nix
+services.nginx.virtualHosts.<app> = {
+  listen = [ { addr = "0.0.0.0"; port = <pick-one>; } ];
+  locations."/" = {
+    proxyPass = "http://10.69.0.<pup-ip>:<pup-port>";
+    extraConfig = ''
+      proxy_set_header Host 10.69.0.<pup-ip>:<pup-port>;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_read_timeout 3600s;   # long video streams
+    '';
+  };
+};
+```
+
+Verified with Jellyfin: apps time out on the mapped port, connect instantly on the nginx port. Also note: verify your chosen port actually traverses the LAN — one test port (8096) silently died in transit on my network while neighbors passed; if a port refuses, move it rather than fight.
+
+## Jellyfin server-side API quirks (10.11)
+
+- `POST /QuickConnect/Authorize` ignores the JSON body — pass the code as a **query param**: `?code=123456` → 200
+- Static API keys: `POST /Auth/Keys?app=<name>` (query param again) — use the token as `X-Emby-Token` header for cron/timer scripts; far more robust than session tokens
+- Background file moves (host timers/rsync) can dodge the container's inotify — trigger `POST /Library/Refresh` from your timer so new media appears within minutes
+
 ## DLNA / SSDP — container multicast does NOT reach the LAN
 
 Pups live on an internal routed bridge (10.69.0.x). **UPnP/DLNA discovery (SSDP multicast, UDP 1900, 239.255.255.250) does not traverse it** — a DLNA server inside a pup (e.g. Jellyfin's DLNA plugin) will never appear in a smart TV's source list, no matter how it's configured.
