@@ -39,3 +39,7 @@ So when Dogecoin Core (or the pup format) updates upstream, this repo follows wi
 ## Status
 
 Dev-tier, tested on Dogebox OS beta (NanoPC-T6).
+
+## License
+
+MIT for the packaging. This repo packages and forks the Dogecoin Foundation's `core` pup (https://github.com/Dogebox-WG/pups) and Dogecoin Core. Those projects and their assets remain the property of their respective owners and are subject to their own licenses.

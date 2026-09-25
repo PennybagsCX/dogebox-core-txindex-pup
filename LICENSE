@@ -20,9 +20,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
----
 
-This repo packages and forks the Dogecoin Foundation's `core` pup
-(https://github.com/Dogebox-WG/pups) and Dogecoin Core. Those projects and
-their assets remain the property of their respective owners and are subject
-to their own licenses.
