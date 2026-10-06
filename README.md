@@ -29,7 +29,13 @@ A txindex node uses roughly **2× the disk** of a standard node (~200 GB vs ~100
 
 ## Install (as a Pup Source)
 
-Dashboard → Pup Store → Manage Sources → add this repo's URL (or a local path on the box), then install "Dogecoin Core (txindex)".
+Dashboard → Pup Store → Manage Sources → add this repo's URL **ending in `.git`** (dogeboxd rejects non-`.git` URLs with `unknown source type`):
+
+```
+https://github.com/PennybagsCX/dogebox-core-txindex-pup.git
+```
+
+then install "Dogecoin Core (txindex)" (manifest version `0.0.6` = tag [`v0.0.6`](https://github.com/PennybagsCX/dogebox-core-txindex-pup/releases/tag/v0.0.6); the box lists versions from semver tags).
 
 ### Avoiding a re-sync when replacing an existing node
 
@@ -43,6 +49,11 @@ This fork tracks upstream automatically:
 - `.github/workflows/sync-upstream.yml` — runs the script weekly (Mon 04:23 UTC); commits + tags + pushes when upstream moves.
 
 So when Dogecoin Core (or the pup format) updates upstream, this repo follows within a week with zero human steps. The Dogebox Pup Store then offers the update on your box like any other pup.
+
+## Known issues
+
+- **v0.0.6 verification-watcher stamp is dead code (functional bug, fix pending).** The bootstrap's background watcher "proves" the index by calling `getrawtransaction` with `114a8938…86381` — but that constant is the **merkleroot of block 1,000,000**, not a txid (block 1M's coinbase txid is `bc06dcc8…4bb9`; both are permanent chain facts, verified live against a synced node). `getrawtransaction` only accepts txids, so the probe can never succeed and `.txindex-verified` is never stamped by the watcher. Impact is limited: the primary completion signal (`Reindexing finished` in `debug.log`) still works, so boots behave correctly — the watcher path is just a no-op for its full 48h window. A functional fix requires a new `pup.nix` (→ new `nixFileSha256`, version bump and tag), so it is tracked here rather than patched silently.
+- Disk figure (~200 GB) reflects the audit box at height ≈6.36M (txindex datadir 190 GB; stock datadir 206 GB on the same disk, both mid-growth).
 
 ## Status
 
