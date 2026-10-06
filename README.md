@@ -7,11 +7,19 @@ Fork of the [Dogebox-WG `core` pup](https://github.com/Dogebox-WG/pups/tree/main
 
 ## Differences from upstream core pup
 
-One flag added to the `dogecoind` invocation in `core-txindex/pup.nix`:
+The `dogecoind` invocation in `core-txindex/pup.nix` differs in two ways:
 
 ```
--txindex=1
+-txindex=1        # always on — the point of this pup
+$REINDEX_FLAG     # -reindex on first boot only, until the index is verified
 ```
+
+Plus a bootstrap block before the invocation (`scripts/bootstrap-fragment.sh`):
+
+- If the datadir has no completed index (no `Reindexing finished` in `debug.log` and no `.txindex-verified` stamp), the pup boots **once with `-reindex`** — a one-time pass over the local block files that can take hours. RPC and the chain tip stay live during the rebuild, so consumers keep working.
+- A background watcher stamps the datadir (`.txindex-verified`) once the index is *functionally* proven: an ancient fixed txid resolves via RPC **and** the chain has caught up. The stamp travels with `/storage`, so pup updates never re-trigger the rebuild.
+
+Why the bootstrap exists: Dogecoin Core 1.14 stores the txindex in `blocks/index`. A datadir ever synced/imported **without** `-txindex` keeps that empty index — later boots with `txindex=1` only index *new* blocks and `getrawtransaction <old-txid>` fails with `No such mempool or blockchain transaction`. Without the bootstrap this failure is silent; with it, the pup self-heals on first boot.
 
 Everything else (monitor, logger, interfaces, metrics, ports) is identical, so this pup is a drop-in provider for the `core-rpc` / `core-zmq` / `core-network` interfaces — pups depending on Core can bind to it instead of the stock pup.
 

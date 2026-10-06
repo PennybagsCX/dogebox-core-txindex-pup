@@ -28,16 +28,40 @@ fi
 
 echo ">> Upstream core changed ($LAST_SHA -> $UP_SHA). Applying txindex patch..."
 
-# 1. Take upstream pup.nix verbatim, then insert -txindex=1 before the zmq line
-#    (upstream always passes -zmqpubhashblock last in the core pup's flags).
+# 1. Take upstream pup.nix verbatim, then apply the fork's three changes:
+#    a) insert the txindex bootstrap fragment (scripts/bootstrap-fragment.sh)
+#       immediately BEFORE the dogecoind invocation line, and
+#    b) append $REINDEX_FLAG to that invocation, and
+#    c) insert -txindex=1 as the first flag (inserted before the zmq line,
+#       as before).
+#    Upstream always passes -zmqpubhashblock last in the core pup's flags.
 if ! grep -q -- '-zmqpubhashblock=tcp://0.0.0.0:28332' "$UP_CORE/pup.nix"; then
   echo "!! Upstream pup.nix no longer contains the expected zmq flag — manual review needed."; exit 1
 fi
 if grep -q -- '-txindex' "$UP_CORE/pup.nix"; then
   echo ">> Upstream now ships txindex natively — fork may be retired. Manual review needed."; exit 1
 fi
-sed 's|\(-zmqpubhashblock=tcp://0.0.0.0:28332\)|-txindex=1 \\\n      \1|' \
-  "$UP_CORE/pup.nix" > "$OUR_PUP_NIX"
+INVOCATION_RE='bin/dogecoind \\'
+if ! grep -q "$INVOCATION_RE" "$UP_CORE/pup.nix"; then
+  echo "!! Upstream pup.nix no longer has the expected dogecoind invocation line — manual review needed."; exit 1
+fi
+awk -v frag="$PWD/scripts/bootstrap-fragment.sh" '
+  index($0, "bin/dogecoind \\") > 0 && !done {
+    while ((getline line < frag) > 0) print line
+    close(frag)
+    done = 1
+  }
+  { print }
+' "$UP_CORE/pup.nix" \
+| sed 's|\(-zmqpubhashblock=tcp://0.0.0.0:28332\)|-txindex=1 \\\n      \1 $REINDEX_FLAG|' \
+> "$OUR_PUP_NIX"
+
+# Sanity: the generated pup.nix must carry BOTH the bootstrap definition and
+# the flag usage — a lone $REINDEX_FLAG with no definition would silently
+# expand to nothing at runtime.
+grep -q 'REINDEX_FLAG="-reindex"' "$OUR_PUP_NIX" || { echo "!! bootstrap fragment (definition) not applied — aborting"; exit 1; }
+grep -q 'txindex-bootstrap' "$OUR_PUP_NIX" || { echo "!! bootstrap fragment (marker) not applied — aborting"; exit 1; }
+grep -q 'zmqpubhashblock=tcp://0.0.0.0:28332 $REINDEX_FLAG' "$OUR_PUP_NIX" || { echo "!! REINDEX_FLAG not appended to invocation — aborting"; exit 1; }
 
 # 2. Refresh ancillary assets wholesale (monitor/logger may change upstream).
 #    NOTE: logo.png is intentionally NOT synced — this repo carries a custom logo.
