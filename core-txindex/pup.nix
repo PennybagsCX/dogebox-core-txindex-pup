@@ -66,7 +66,7 @@ let
                   -H 'Content-Type: application/json' -d @- \
                   "http://$DBX_PUP_IP:22555/" 2>/dev/null | \
                   grep -o '"result":[0-9]*' | cut -d: -f2)
-            ok=$(echo '{"jsonrpc":"1.0","id":"c","method":"getrawtransaction","params":["114a8938ac57cae498835729d3b971ac79334626c1e72ae665cbe4f58a386381"]}' | \
+            ok=$(echo '{"jsonrpc":"1.0","id":"c","method":"getrawtransaction","params":["bc06dcc8c8841728b905fa45e4d21ed460a2e136bb0545fcf2906a149e704bb9"]}' | \
                 curl -s -m 5 --user "$RPCUSER:$RPCPASS" \
                   -H 'Content-Type: application/json' -d @- \
                   "http://$DBX_PUP_IP:22555/" 2>/dev/null | \
